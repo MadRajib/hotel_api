@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, jsonify
 from flask_restful import Resource, Api
 import sqlite3
 from contextlib import closing
@@ -59,8 +59,22 @@ class HotelDetail(Resource):
     else:
        return hotel
 
+class RoomDetail(Resource):
+  def get(self,hotel_id):
+    hotel = query_db('select * from HOTEl_DETAIL where id = ?',
+                [hotel_id], one=True)
+    if hotel is None:
+        return {"hotel":"not found"}
+    else:
+      room_data = {"rooms":[]};
+      for rooms in query_db('select * from rooms'):
+        room_data["rooms"].append(rooms)
+      return jsonify(room_data)
+       
+
 
 api.add_resource(HotelDetail, '/api/hotelDetail/<int:hotel_id>')
+api.add_resource(RoomDetail, '/api/roomDetail/<int:hotel_id>')
 
 
 if __name__ == '__main__':
