@@ -52,29 +52,63 @@ def query_db(query, args=(), one=False):
 
 class HotelDetail(Resource):
   def get(self,hotel_id):
-    hotel = query_db('select * from HOTEl_DETAIL where id = ?',
+
+    data = {
+      "hotel_id" : hotel_id,
+      "data" : None
+    }
+
+    hotel = None
+    if(type(hotel_id) == int):
+      hotel = query_db('select * from HOTEl_DETAIL where id = ?',
                 [hotel_id], one=True)
+    elif (type(hotel_id) == str):
+      hotel = query_db("select * from HOTEl_DETAIL where name = ?",
+                [hotel_id], one=True)
+
+    
     if hotel is None:
-        return {"hotel":"not found"}
+        data["data"] = "Not Found!"
     else:
-       return hotel
+       data["data"] =  hotel
+    
+    return jsonify(data)
 
 class RoomDetail(Resource):
   def get(self,hotel_id):
-    hotel = query_db('select * from HOTEl_DETAIL where id = ?',
+    
+    
+    hotel = None
+    if(type(hotel_id) == int):
+      hotel = query_db('select id from HOTEl_DETAIL where id = ?',
                 [hotel_id], one=True)
+    elif (type(hotel_id) == str):
+      hotel = query_db("select name from HOTEl_DETAIL where name = ?",
+                [hotel_id], one=True)
+
+
+    data = {
+      "hotel_id" : hotel_id,
+      "data" : None
+    }
+
+
     if hotel is None:
-        return {"hotel":"not found"}
+        data["data"] = "Not Found !"
     else:
       room_data = {"rooms":[]};
       for rooms in query_db('select * from rooms'):
         room_data["rooms"].append(rooms)
-      return jsonify(room_data)
+      
+      data["data"] = room_data
+
+
+    return jsonify(data)
        
 
 
-api.add_resource(HotelDetail, '/api/hotelDetail/<int:hotel_id>')
-api.add_resource(RoomDetail, '/api/roomDetail/<int:hotel_id>')
+api.add_resource(HotelDetail, '/api/hotelDetail/<int:hotel_id>','/api/hotelDetail/<string:hotel_id>')
+api.add_resource(RoomDetail,'/api/roomDetail/<int:hotel_id>','/api/roomDetail/<string:hotel_id>')
 
 
 if __name__ == '__main__':
